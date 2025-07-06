@@ -1,28 +1,26 @@
 package com.example;
 
-
 import java.util.List;
 
-public class Feline implements Predator {
-    private final Animal animal;
-
-    public Feline(Animal animal) {
-        this.animal = animal;
-    }
-
+public class Feline extends Animal implements Predator {
+    @Override
     public List<String> eatMeat() throws Exception {
-        return animal.getFood("Хищник");
-    }
-
-    public String getFamily() {
-        return "Кошачьи";
+        return getFood("Хищник");
     }
 
     public int getKittens() {
-        return animal.getChildren();
+        return getKittens(1);
     }
 
-    public int getKittens(int count) {
-        return animal.getChildren(count);
+    public int getKittens(int kittensCount) {
+        if (kittensCount < 0) {
+            throw new IllegalArgumentException("Количество котят не может быть отрицательным");
+        }
+        return kittensCount;
+    }
+
+    @Override
+    public String getFamily() {
+        return "Кошачьи";
     }
 }

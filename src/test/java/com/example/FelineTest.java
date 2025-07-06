@@ -1,13 +1,10 @@
 package com.example;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -15,66 +12,53 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class FelineTest {
 
-    @Mock
-    private Animal animalMock;
-
+    @Spy
     @InjectMocks
-    private Feline feline;
+    private Feline felineSpy;
 
-    @Before
-    public void setup() {
-        // Настраиваем моки для методов по умолчанию
-        when(animalMock.getChildren()).thenReturn(1);
-        when(animalMock.getChildren(anyInt())).thenAnswer(invocation -> {
-            int count = invocation.getArgument(0);
-            return count;
-        });
+    // Тест 1: getKittens() без параметров вызывает getKittens(1)
+    @Test
+    public void getKittens_NoArguments_CallsWithDefaultOne() {
+        felineSpy.getKittens();
+        verify(felineSpy, times(1)).getKittens(1);
     }
 
+    // Тест 2: getKittens(int) возвращает переданное значение
     @Test
-    public void testEatMeatWithMock() throws Exception {
-        // Настраиваем мок
-        when(animalMock.getFood("Хищник")).thenReturn(List.of("Мясо", "Кости"));
-
-        List<String> result = feline.eatMeat();
-
-        verify(animalMock).getFood("Хищник");
-        assertEquals(List.of("Мясо", "Кости"), result);
+    public void getKittens_WithArgument_ReturnsSameValue() {
+        assertEquals(3, felineSpy.getKittens(3));
     }
 
-    @Test
-    public void testEatMeatCallsGetFoodWithPredator() throws Exception {
-        // Используем реальную реализацию Animal
-        Feline realFeline = new Feline(new Animal());
-        List<String> expectedFood = Arrays.asList("Животные", "Птицы", "Рыба");
-
-        List<String> actualFood = realFeline.eatMeat();
-
-        assertEquals(expectedFood, actualFood);
+    // Тест 3: Отрицательное количество котят вызывает исключение
+    @Test(expected = IllegalArgumentException.class)
+    public void getKittens_NegativeNumber_ThrowsException() {
+        felineSpy.getKittens(-1);
     }
 
+    // Тест 4: getFamily() возвращает правильное значение
     @Test
-    public void testGetFamilyReturnsCorrectValue() {
-        assertEquals("Кошачьи", feline.getFamily());
+    public void getFamily_ReturnsCatFamily() {
+        assertEquals("Кошачьи", felineSpy.getFamily());
     }
 
+    // Тест 5: eatMeat() вызывает getFood("Хищник")
     @Test
-    public void testGetKittensWithoutParameters() {
-        assertEquals(1, feline.getKittens());
-        verify(animalMock).getChildren();
+    public void eatMeat_CallsGetFoodWithPredatorType() throws Exception {
+        // Подменяем только getFood(), оставляя остальную логику
+        doReturn(List.of("Мясо")).when(felineSpy).getFood("Хищник");
+
+        felineSpy.eatMeat();
+
+        verify(felineSpy, times(1)).getFood("Хищник");
     }
 
+    // Тест 6: eatMeat() возвращает правильный список еды
     @Test
-    public void testGetKittensWithParameter() {
-        int expectedCount = 5;
-        assertEquals(expectedCount, feline.getKittens(expectedCount));
-        verify(animalMock).getChildren(expectedCount);
-    }
+    public void eatMeat_ReturnsCorrectFoodList() throws Exception {
+        // Подменяем возвращаемое значение getFood()
+        doReturn(List.of("Мясо")).when(felineSpy).getFood("Хищник");
 
-    @Test
-    public void testGetKittensUsesAnimalImplementation() {
-        // Тест с реальной реализацией Animal
-        Feline realFeline = new Feline(new Animal());
-        assertTrue("Количество котят должно быть >= 0", realFeline.getKittens(3) >= 0);
+        List<String> result = felineSpy.eatMeat();
+        assertEquals(List.of("Мясо"), result);
     }
 }
