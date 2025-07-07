@@ -1,69 +1,61 @@
 package com.example;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.mockito.junit.MockitoJUnitRunner;
+import java.util.List;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(Parameterized.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LionTest {
+
     @Mock
-    private Predator predator;
+    private Feline felineMock;
 
-    @Parameterized.Parameters(name = "Пол: {0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Самец"},
-                {"Самка"}
-        });
-    }
-
-    @Parameterized.Parameter
-    public String sex;
-
-    @Before
-    public void init() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    // Тест 1: Проверка наличия гривы
     @Test
-    public void doesHaveMane_ShouldReturnCorrectForSex() throws Exception {
-        Lion lion = new Lion(sex, predator);
-        boolean result = lion.doesHaveMane();
-        if ("Самец".equals(sex)) {
-            assertTrue(result);
-        } else {
-            assertFalse(result);
-        }
+    public void getFoodShouldCallEatMeatOnFeline() throws Exception {
+        // Задаем поведение мока
+        when(felineMock.eatMeat()).thenReturn(List.of("Мясо", "Птица"));
+
+        Lion lion = new Lion("Самец", felineMock);
+        List<String> food = lion.getFood();
+
+        assertEquals(List.of("Мясо", "Птица"), food);
+        verify(felineMock, times(1)).eatMeat();
     }
 
-    // Тест 2: Проверка вызова eatMeat()
     @Test
-    public void getFood_ShouldCallEatMeatOnce() throws Exception {
-        Lion lion = new Lion(sex, predator);
-        lion.getFood();
-        verify(predator, times(1)).eatMeat();
-    }
+    public void getKittensShouldCallGetKittensOnFeline() throws Exception {
+        when(felineMock.getKittens()).thenReturn(3);
 
-    // Тест 3: Проверка возврата котят
-    @Test
-    public void getKittens_ShouldCallGetKittensOnce() throws Exception {
-        Feline felineMock = mock(Feline.class);
-        Lion lion = new Lion(sex, felineMock);
-        lion.getKittens();
+        Lion lion = new Lion("Самка", felineMock);
+        int kittens = lion.getKittens();
+
+        assertEquals(3, kittens);
         verify(felineMock, times(1)).getKittens();
     }
+
+    @Test
+    public void maleLion_HasMane() throws Exception {
+        Lion lion = new Lion("Самец", felineMock);
+        assertTrue(lion.doesHaveMane());
+    }
+
+    @Test
+    public void femaleLionHasNoMane() throws Exception {
+        Lion lion = new Lion("Самка", felineMock);
+        assertFalse(lion.doesHaveMane());
+    }
+
     @Test(expected = Exception.class)
-    public void constructor_WithInvalidSex_ShouldThrowException() throws Exception {
-        new Lion("Неизвестно", mock(Predator.class));
+    public void invalidSexThrowsException() throws Exception {
+        new Lion("Неизвестно", felineMock);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void nullFelineThrowsException() throws Exception {
+        new Lion("Самец", null);
     }
 }

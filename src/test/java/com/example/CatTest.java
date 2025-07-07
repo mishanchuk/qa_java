@@ -15,12 +15,12 @@ public class CatTest {
     private Feline feline;
 
     @Test
-    public void getSound_ReturnsMeow() {
+    public void getSoundReturnsMeow() {
         assertEquals("Мяу", new Cat(feline).getSound());
     }
 
     @Test
-    public void getFood_CallsEatMeatOnce() throws Exception {
+    public void getFoodCallsEatMeatOnce() throws Exception {
         new Cat(feline).getFood();
         verify(feline, times(1)).eatMeat();
     }
