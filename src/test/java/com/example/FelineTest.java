@@ -2,7 +2,7 @@ package com.example;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -11,59 +11,55 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class FelineTest {
 
-    @Mock
-    private Animal animalMock;
+    @Spy
+    private Feline felineSpy;
 
-    // Тестируемый объект создаем вручную
-    private Feline createFeline() {
-        return new Feline() {
-            // Переопределяем метод, чтобы подменить родительскую реализацию
-            @Override
-            public List<String> getFood(String animalKind) throws Exception {
-                return animalMock.getFood(animalKind);
-            }
-        };
-    }
-
-    // Тест 1: getKittens() без параметров
     @Test
-    public void getKittensNoArgumentsReturnsOne() {
-        Feline feline = new Feline(); // Тестируем реальный объект
-        assertEquals(1, feline.getKittens());
+    public void eatMeatShouldReturnCorrectPredatorFood() throws Exception {
+        doReturn(List.of("Животные", "Птицы", "Рыба"))
+                .when(felineSpy).getFood("Хищник");
+        List<String> result = felineSpy.eatMeat();
+        assertEquals(List.of("Животные", "Птицы", "Рыба"), result);
     }
 
-    // Тест 2: getKittens(int) с валидным значением
     @Test
-    public void getKittensWithPositiveNumberReturnsSameValue() {
-        Feline feline = new Feline();
-        assertEquals(3, feline.getKittens(3));
+    public void eatMeatShouldCallGetFoodWithPredatorArgument() throws Exception {
+        doReturn(List.of("Животные", "Птицы", "Рыба"))
+                .when(felineSpy).getFood("Хищник");
+        felineSpy.eatMeat();
+        verify(felineSpy, times(1)).getFood("Хищник");
     }
 
-    // Тест 3: getKittens(int) с отрицательным значением
+    @Test
+    public void getKittensNoArgumentsShouldReturnOne() {
+        assertEquals(1, new Feline().getKittens());
+    }
+
+    @Test
+    public void getKittensNoArgumentsShouldCallWithDefaultValue() {
+        Feline spy = spy(new Feline());
+        spy.getKittens();
+        verify(spy, times(1)).getKittens(1);
+    }
+
+    @Test
+    public void getKittensWithArgumentShouldReturnSameValue() {
+        assertEquals(3, new Feline().getKittens(3));
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void getKittensWithNegativeNumberThrowsException() {
+    public void getKittensNegativeCountShouldThrowException() {
         new Feline().getKittens(-1);
     }
 
-    // Тест 4: getFamily()
     @Test
-    public void getFamilyReturnsCatFamily() {
+    public void getFamilyShouldReturnCatFamily() {
         assertEquals("Кошачьи", new Feline().getFamily());
     }
 
-    // Тест 5: eatMeat() вызывает getFood("Хищник")
-    @Test
-    public void eatMeatCallsGetFoodWithPredatorType() throws Exception {
-        Feline feline = createFeline();
-        feline.eatMeat();
-        verify(animalMock, times(1)).getFood("Хищник");
-    }
-
-    // Тест 6: eatMeat() возвращает значение от getFood()
-    @Test
-    public void eatMeatReturnsValueFromGetFood() throws Exception {
-        Feline feline = createFeline();
-        when(animalMock.getFood("Хищник")).thenReturn(List.of("Мясо"));
-        assertEquals(List.of("Мясо"), feline.eatMeat());
+    @Test(expected = Exception.class)
+    public void eatMeatWhenGetFoodThrowsExceptionShouldPropagateIt() throws Exception {
+        doThrow(new Exception("Ошибка")).when(felineSpy).getFood("Хищник");
+        felineSpy.eatMeat();
     }
 }

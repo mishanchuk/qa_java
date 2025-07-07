@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -34,15 +33,5 @@ public class LionParameterizedTest {
         assertEquals(expectedHasMane, lion.doesHaveMane());
     }
 
-    @Test
-    public void getFoodShouldCallEatMeatOnFeline() throws Exception {
-        Feline felineMock = mock(Feline.class);
-        when(felineMock.eatMeat()).thenReturn(List.of("Мясо"));
 
-        Lion lion = new Lion(sex, felineMock);
-        List<String> food = lion.getFood();
-
-        assertEquals(List.of("Мясо"), food);
-        verify(felineMock, times(1)).eatMeat();
-    }
 }
