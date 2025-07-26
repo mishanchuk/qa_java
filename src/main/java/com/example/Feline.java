@@ -3,15 +3,9 @@ package com.example;
 import java.util.List;
 
 public class Feline extends Animal implements Predator {
-
     @Override
     public List<String> eatMeat() throws Exception {
         return getFood("Хищник");
-    }
-
-    @Override
-    public String getFamily() {
-        return "Кошачьи";
     }
 
     public int getKittens() {
@@ -19,7 +13,14 @@ public class Feline extends Animal implements Predator {
     }
 
     public int getKittens(int kittensCount) {
+        if (kittensCount < 0) {
+            throw new IllegalArgumentException("Количество котят не может быть отрицательным");
+        }
         return kittensCount;
     }
 
+    @Override
+    public String getFamily() {
+        return "Кошачьи";
+    }
 }
